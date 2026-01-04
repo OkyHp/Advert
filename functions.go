@@ -42,8 +42,8 @@ func ReplaceStaticPlaceholders(advert *AdvertsData) {
 			buff = strings.ReplaceAll(buff, tag, value)
 		}
 
-		buff = strings.ReplaceAll(buff, "{IP}", GetServerIP())
-		buff = strings.ReplaceAll(buff, "{PORT}", GetServerPort())
+		buff = strings.ReplaceAll(buff, "{Ip}", GetServerIP())
+		buff = strings.ReplaceAll(buff, "{Port}", GetServerPort())
 
 		advert.MsgText[lang] = buff
 	}
@@ -53,7 +53,7 @@ func ReplacePlaceholders() {
 	for index, _ := range Plugin.Adverts {
 		for lang, _ := range Plugin.Adverts[index].MsgText {
 			Plugin.Adverts[index].MsgText[lang] =
-				strings.ReplaceAll(Plugin.Adverts[index].MsgText[lang], "{MAP}", s2.GetCurrentMap())
+				strings.ReplaceAll(Plugin.Adverts[index].MsgText[lang], "{Map}", s2.GetCurrentMap())
 		}
 	}
 }
