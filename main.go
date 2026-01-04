@@ -32,13 +32,13 @@ func (rs *ResetScorePlugin) OnPluginStart() {
 
 	rs.Config, err = ReadConfig()
 	if err != nil {
-		s2.PrintToServer(fmt.Sprintf("[Advert] CONFIG: %s", err))
+		s2.PrintToServer(fmt.Sprintf("[Advert] CONFIG: %s\n", err))
 		return
 	}
 
 	err = InitDatabase()
 	if err != nil {
-		s2.PrintToServer(fmt.Sprintf("[Advert] DATABASE: %s", err))
+		s2.PrintToServer(fmt.Sprintf("[Advert] DATABASE: %s\n", err))
 		return
 	}
 

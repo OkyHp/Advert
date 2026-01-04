@@ -101,7 +101,7 @@ func GetAdverts() error {
 		SELECT msg_type, msg_text
 		FROM adverts
 		WHERE (
-		    JSON_CONTAINS(servers, 1, '$') 
+		    JSON_CONTAINS(servers, ?, '$') 
 		    OR servers = '' 
 		    OR servers = '[]'
 		) AND disable = 0
