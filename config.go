@@ -9,20 +9,20 @@ import (
 )
 
 type DBConfig struct {
-	Host   string            `yml:"host"`
-	Base   string            `yml:"base"`
-	User   string            `yml:"user"`
-	Pass   string            `yml:"pass"`
-	Port   uint16            `yml:"port"`
-	Params map[string]string `yml:"params"`
+	Host   string            `yaml:"host"`
+	Base   string            `yaml:"base"`
+	User   string            `yaml:"user"`
+	Pass   string            `yaml:"pass"`
+	Port   uint16            `yaml:"port"`
+	Params map[string]string `yaml:"params"`
 }
 
 type ConfigData struct {
-	TimerInterval   float64  `yml:"timerInterval"`
-	ServerId        uint16   `yml:"serverId"`
-	ServerIp        string   `yml:"serverIp"`
-	HtmlMsgDuration int32    `yml:"htmlMsgDuration"`
-	Database        DBConfig `yml:"database"`
+	TimerInterval   float64  `yaml:"timerInterval"`
+	ServerId        uint16   `yaml:"serverId"`
+	ServerIp        string   `yaml:"serverIp"`
+	HtmlMsgDuration int32    `yaml:"htmlMsgDuration"`
+	Database        DBConfig `yaml:"database"`
 }
 
 func ReadConfig() (ConfigData, error) {

@@ -75,7 +75,7 @@ func createConnection() (*sql.DB, error) {
 
 func CreateTable() error {
 	queries := []string{ // For N+ queries
-		`CREATE TABLE adverts(
+		`CREATE TABLE IF NOT EXIST adverts(
 			id INT UNSIGNED NOT NULL AUTO_INCREMENT,
 			servers VARCHAR(64) NOT NULL DEFAULT '[]',
 			msg_type ENUM('CHAT', 'CENTER', 'ALERT', 'HTML') NOT NULL,
@@ -100,8 +100,11 @@ func GetAdverts() error {
 	query := `
 		SELECT msg_type, msg_text
 		FROM adverts
-		WHERE JSON_CONTAINS(servers, ?, '$')
-		  AND disable = 0
+		WHERE (
+		    JSON_CONTAINS(servers, 1, '$') 
+		    OR servers = '' 
+		    OR servers = '[]'
+		) AND disable = 0
 		ORDER BY id, position DESC
 	`
 

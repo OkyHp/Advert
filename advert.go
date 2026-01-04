@@ -1,17 +1,20 @@
 package main
 
-import s2 "github.com/OkyHp/plg_utils/s2sdk"
+import (
+	s2 "github.com/OkyHp/plg_utils/s2sdk"
+	"github.com/OkyHp/plg_utils/utils"
+)
 
 func (rs *ResetScorePlugin) OnTimerAdvert(timer uint32, userData []any) {
 	advert := rs.Adverts[rs.CurrentIndex]
 
-	for i := int32(1); i < s2.GetMaxClients()+1; i++ {
+	for i := int32(0); i < s2.GetMaxClients()+1; i++ {
 		if s2.IsClientInGame(i) && !s2.IsFakeClient(i) { // IsVipClient
-			lang := GetClientLanguageEx(i)
+			lang := utils.GetClientLanguageEx(i)
 			if advert.MsgText[lang] != "" {
 				switch advert.MsgType {
 				case "CHAT":
-					s2.PrintToChat(i, advert.MsgText[lang])
+					s2.PrintToChat(i, " "+advert.MsgText[lang])
 					break
 				case "CENTER":
 					s2.PrintCenterText(i, advert.MsgText[lang])

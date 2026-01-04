@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"runtime/debug"
+	"unsafe"
 
 	s2 "github.com/OkyHp/plg_utils/s2sdk"
 	"github.com/untrustedmodders/go-plugify"
@@ -23,15 +24,21 @@ func init() {
 func (rs *ResetScorePlugin) OnPluginStart() {
 	var err error
 
+	iface := s2.FindInterface("NetworkSystemVersion001")
+	if iface == 0 {
+		panic("interface nil")
+	}
+	rs.NetworkSystem = unsafe.Pointer(iface)
+
 	rs.Config, err = ReadConfig()
 	if err != nil {
-		s2.PrintToServer(fmt.Sprintf("CONFIG: %s", err))
+		s2.PrintToServer(fmt.Sprintf("[Advert] CONFIG: %s", err))
 		return
 	}
 
 	err = InitDatabase()
 	if err != nil {
-		s2.PrintToServer(fmt.Sprintf("DATABASE: %s", err))
+		s2.PrintToServer(fmt.Sprintf("[Advert] DATABASE: %s", err))
 		return
 	}
 
@@ -51,7 +58,7 @@ func (rs *ResetScorePlugin) OnServerActivate() { // it`s OnMapStart
 	ReplacePlaceholders()
 
 	if len(Plugin.Adverts) > 0 {
-		s2.CreateTimer(Plugin.Config.TimerInterval, rs.OnTimerAdvert, s2.TimerFlag_NoMapChange, []any{})
+		s2.CreateTimer(Plugin.Config.TimerInterval, rs.OnTimerAdvert, s2.TimerFlag_NoMapChange|s2.TimerFlag_Repeat, []any{})
 	}
 }
 

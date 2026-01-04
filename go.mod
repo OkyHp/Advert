@@ -3,7 +3,7 @@ module advert
 go 1.25.5
 
 require (
-	github.com/OkyHp/plg_utils v0.1.5
+	github.com/OkyHp/plg_utils v0.1.6
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/untrustedmodders/go-plugify v1.4.9
 	gopkg.in/yaml.v3 v3.0.1

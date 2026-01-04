@@ -1,8 +1,21 @@
 package main
 
+/*
+#include <stdint.h>
+
+typedef void* (*UpdatePublicIPFn)(void*);
+
+static inline void* Call_UpdatePublicIP(void* fn, void* thisptr) {
+    return ((UpdatePublicIPFn)fn)(thisptr);
+}
+*/
+import "C"
+
 import (
 	"fmt"
+	"strconv"
 	"strings"
+	"unsafe"
 
 	s2 "github.com/OkyHp/plg_utils/s2sdk"
 )
@@ -59,41 +72,40 @@ func ReplacePlaceholders() {
 }
 
 func GetServerIP() string {
-	if Plugin.Config.ServerIp == "" {
-		cvar := s2.FindConVar("hostip")
-		if cvar != 0 {
-			return Uint32ToIPv4(s2.GetConVarUInt32(cvar))
-		}
+	if Plugin.Config.ServerIp != "" {
+		return Plugin.Config.ServerIp
 	}
 
-	return Plugin.Config.ServerIp
+	fnPtr := getVFunc(Plugin.NetworkSystem, 32)
+	if fnPtr == nil {
+		panic("fnPtr nil")
+	}
+
+	netadr := unsafe.Pointer(C.Call_UpdatePublicIP(
+		unsafe.Pointer(fnPtr),
+		Plugin.NetworkSystem,
+	))
+	if netadr == nil {
+		panic("netadr nil")
+	}
+
+	ip := (*[4]byte)(unsafe.Add(netadr, 4))
+
+	return fmt.Sprintf("Public IP: %d.%d.%d.%d\n",
+		ip[0], ip[1], ip[2], ip[3],
+	)
 }
 
 func GetServerPort() string {
 	cvar := s2.FindConVar("hostport")
 	if cvar != 0 {
-		return s2.GetConVarString(cvar)
+		return strconv.Itoa(int(s2.GetConVarInt32(cvar)))
 	}
 
 	return ""
 }
 
-func Uint32ToIPv4(ip uint32) string {
-	return fmt.Sprintf("%d.%d.%d.%d",
-		byte(ip>>24),
-		byte(ip>>16),
-		byte(ip>>8),
-		byte(ip),
-	)
-}
-
-func GetClientLanguageEx(playerSlot int32) string {
-	lang := "en"
-
-	buff := s2.GetClientLanguage(playerSlot)
-	if len(buff) >= 2 {
-		lang = buff[:2]
-	}
-
-	return lang
+func getVFunc(obj unsafe.Pointer, index int) unsafe.Pointer {
+	vtbl := *(*unsafe.Pointer)(obj)
+	return *(*unsafe.Pointer)(unsafe.Add(vtbl, uintptr(index)*unsafe.Sizeof(uintptr(0))))
 }
