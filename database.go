@@ -75,7 +75,7 @@ func createConnection() (*sql.DB, error) {
 
 func CreateTable() error {
 	queries := []string{ // For N+ queries
-		`CREATE TABLE IF NOT EXIST adverts(
+		`CREATE TABLE IF NOT EXISTS adverts(
 			id INT UNSIGNED NOT NULL AUTO_INCREMENT,
 			servers VARCHAR(64) NOT NULL DEFAULT '[]',
 			msg_type ENUM('CHAT', 'CENTER', 'ALERT', 'HTML') NOT NULL,
