@@ -1,0 +1,10 @@
+timerInterval: 15.0
+serverId: 1           # 0 in DB - print for all servers
+serverIp: ""          # it`s optional param for domen`s IP
+htmlMsgDuration: 2    # in sec
+database:
+  host: "localhost"
+  base: "advert"
+  user: "user"
+  pass: "pass"
+  port: 3306

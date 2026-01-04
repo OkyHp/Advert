@@ -1,0 +1,14 @@
+{
+  "$schema": "https://raw.githubusercontent.com/untrustedmodders/plugify/refs/heads/main/schemas/plugin.schema.json",
+  "name": "Advert",
+  "version": "1.0.0",
+  "author": "OkyHek",
+  "dependencies": [
+    {
+      "name": "s2sdk"
+    }
+  ],
+  "entry": "Advert",
+  "language": "golang",
+  "methods": []
+}
