@@ -50,19 +50,17 @@ func (pl *AdvertPlugin) OnPluginPanic() []byte {
 }
 
 func (pl *AdvertPlugin) OnServerActivate() { // it`s OnMapStart
-	if pl.MapLoadTime+int64(3) > time.Now().Unix() {
-		return
+	if time.Now().Unix() > pl.MapLoadTime+int64(3) {
+		err := LoadAdvert()
+		if err != nil {
+			fmt.Printf("[Advert] LoadAdvert: %s\n", err)
+			return
+		}
 	}
 	pl.MapLoadTime = time.Now().Unix()
 
-	err := LoadAdvert()
-	if err != nil {
-		fmt.Printf("[Advert] LoadAdvert: %s\n", err)
-		return
-	}
-
-	Plugin.CurrentIndex = 0
-	MSGDebug("Advert OnServerActivate. Index: %d | Adverts for map %v", Plugin.CurrentIndex, pl.Adverts)
+	pl.CurrentIndex = 0
+	MSGDebug("Advert OnServerActivate. Index: %d | Adverts len %d", pl.CurrentIndex, len(pl.Adverts))
 
 	if len(pl.Adverts) > 0 {
 		s2.CreateTimer(Plugin.Config.TimerInterval, pl.OnTimerAdvert, s2.TimerFlag_NoMapChange|s2.TimerFlag_Repeat, []any{})

@@ -7,10 +7,14 @@ import (
 
 func (pl *AdvertPlugin) OnTimerAdvert(timer uint32, userData []any) {
 	advert := pl.Adverts[pl.CurrentIndex]
+	MSGDebug("Advert OnTimerAdvert", advert)
 
 	for i := int32(0); i < s2.GetMaxClients()+1; i++ {
 		if s2.IsClientInGame(i) && !s2.IsFakeClient(i) { // IsVipClient
 			lang := utils.GetClientLanguageEx(i)
+			MSGDebug("Advert OnTimerAdvert: playerSlot: %d | Index %d | msgType %s | MsgText %s",
+				i, pl.CurrentIndex, advert.MsgType, advert.MsgText[lang])
+
 			if advert.MsgText[lang] != "" {
 				switch advert.MsgType {
 				case "CHAT":
