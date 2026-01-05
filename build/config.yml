@@ -4,8 +4,12 @@ serverId: 1           # 0 in DB - print for all servers
 serverIp: ""          # it`s optional param for domen`s IP
 htmlMsgDuration: 3    # in sec
 database:
-  host: "81.90.180.95"
-  base: "unit_test"
-  user: "okyhek"
-  pass: "NapasLoh47"
-  port: 3322
+  host: "localhost"
+  base: "base"
+  user: "user"
+  pass: "pass"
+  port: 3306
+  params:
+    timeout: "5"
+    readTimeout: "10"
+    writeTimeout: "10"
