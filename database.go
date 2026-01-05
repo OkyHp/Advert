@@ -18,6 +18,8 @@ type AdvertsData struct {
 var db *sql.DB
 
 func InitDatabase() error {
+	MSGDebug("Advert InitDatabase")
+
 	var err error
 
 	db, err = createDatabaseConnection()
@@ -61,20 +63,20 @@ func createDatabaseConnection() (*sql.DB, error) {
 
 	MSGDebug("Advert DB: %s", dsn.String()[2:])
 
-	db, err := sql.Open("mysql", dsn.String()[2:])
+	dbConn, err := sql.Open("mysql", dsn.String()[2:])
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
 
-	err = db.Ping()
+	err = dbConn.Ping()
 	if err != nil {
-		_ = db.Close()
+		_ = dbConn.Close()
 		return nil, fmt.Errorf("failed to connect database: %w", err)
 	}
 
 	MSGDebug("Advert createDatabaseConnection")
 
-	return db, nil
+	return dbConn, nil
 }
 
 func createTable() error {

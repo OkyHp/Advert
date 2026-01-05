@@ -41,7 +41,5 @@ func ReadConfig() (ConfigData, error) {
 		return ConfigData{}, fmt.Errorf("failed to parse YAML: %w", err)
 	}
 
-	MSGDebug("Advert ReadConfig: %v", config)
-
 	return config, err
 }
