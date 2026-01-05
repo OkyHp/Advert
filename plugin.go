@@ -2,15 +2,17 @@ package main
 
 import "unsafe"
 
-type ResetScorePlugin struct {
+type AdvertPlugin struct {
 	Config ConfigData
 
 	Adverts      []AdvertsData
 	CurrentIndex uint32
 
+	DatabaseInit  bool
+	MapLoadTime   int64
 	NetworkSystem unsafe.Pointer
 }
 
-func NewResetScorePlugin() *ResetScorePlugin {
-	return &ResetScorePlugin{}
+func NewAdvertPlugin() *AdvertPlugin {
+	return &AdvertPlugin{}
 }

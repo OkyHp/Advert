@@ -15,25 +15,32 @@ type AdvertsData struct {
 	MsgText map[string]string `db:"msg_text"`
 }
 
-var db *sql.DB
+type Database struct {
+	conn *sql.DB
+}
 
-func InitDatabase() error {
+func LoadAdvert() error {
 	MSGDebug("Advert InitDatabase")
 
+	var db Database
 	var err error
 
-	db, err = createDatabaseConnection()
+	db.conn, err = createDatabaseConnection()
 	if err != nil {
 		return err
 	}
-	defer db.Close()
+	defer db.conn.Close()
 
-	err = createTable()
-	if err != nil {
-		return err
+	if !Plugin.DatabaseInit {
+		err = db.createTable()
+		if err != nil {
+			return err
+		}
+
+		Plugin.DatabaseInit = true
 	}
 
-	err = getAdverts()
+	err = db.getAdverts()
 	if err != nil {
 		return err
 	}
@@ -79,7 +86,7 @@ func createDatabaseConnection() (*sql.DB, error) {
 	return dbConn, nil
 }
 
-func createTable() error {
+func (db *Database) createTable() error {
 	queries := []string{ // For N+ queries
 		`CREATE TABLE IF NOT EXISTS adverts(
 			id INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -93,7 +100,7 @@ func createTable() error {
 	}
 
 	for index := range queries {
-		_, err := db.Exec(queries[index])
+		_, err := db.conn.Exec(queries[index])
 		if err != nil {
 			return fmt.Errorf("create table 'adverts' (#%d): %w", index, err)
 		}
@@ -104,7 +111,7 @@ func createTable() error {
 	return nil
 }
 
-func getAdverts() error {
+func (db *Database) getAdverts() error {
 	query := `
 		SELECT msg_type, msg_text
 		FROM adverts
@@ -116,7 +123,7 @@ func getAdverts() error {
 		ORDER BY id, position DESC
 	`
 
-	rows, err := db.Query(query, Plugin.Config.ServerId)
+	rows, err := db.conn.Query(query, Plugin.Config.ServerId)
 	if err != nil {
 		return fmt.Errorf("select 'adverts': %w", err)
 	}

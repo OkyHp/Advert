@@ -29,16 +29,17 @@ type ConfigData struct {
 func ReadConfig() (ConfigData, error) {
 	pathToFile := fmt.Sprintf("%s/config.yml", plugify.Plugin.Location)
 
-	data, err := os.ReadFile(pathToFile)
+	file, err := os.Open(pathToFile)
 	if err != nil {
-		return ConfigData{}, fmt.Errorf("failed to read config file: %w", err)
+		return ConfigData{}, fmt.Errorf("failed to open config file: %w", err)
 	}
+	defer file.Close()
 
 	var config ConfigData
 
-	err = yaml.Unmarshal(data, &config)
+	err = yaml.NewDecoder(file).Decode(&config)
 	if err != nil {
-		return ConfigData{}, fmt.Errorf("failed to parse YAML: %w", err)
+		return ConfigData{}, fmt.Errorf("failed to parse config: %w", err)
 	}
 
 	return config, err

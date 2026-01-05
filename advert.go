@@ -5,8 +5,8 @@ import (
 	"github.com/OkyHp/plg_utils/utils"
 )
 
-func (rs *ResetScorePlugin) OnTimerAdvert(timer uint32, userData []any) {
-	advert := userData[0].([]AdvertsData)[rs.CurrentIndex]
+func (pl *AdvertPlugin) OnTimerAdvert(timer uint32, userData []any) {
+	advert := pl.Adverts[pl.CurrentIndex]
 
 	for i := int32(0); i < s2.GetMaxClients()+1; i++ {
 		if s2.IsClientInGame(i) && !s2.IsFakeClient(i) { // IsVipClient
@@ -23,12 +23,12 @@ func (rs *ResetScorePlugin) OnTimerAdvert(timer uint32, userData []any) {
 					s2.PrintAlertText(i, advert.MsgText[lang])
 					break
 				case "HTML":
-					s2.PrintCentreHtml(i, advert.MsgText[lang], rs.Config.HtmlMsgDuration)
+					s2.PrintCentreHtml(i, advert.MsgText[lang], pl.Config.HtmlMsgDuration)
 					break
 				}
 			}
 		}
 	}
 
-	rs.CurrentIndex = (rs.CurrentIndex + 1) % uint32(len(rs.Adverts))
+	pl.CurrentIndex = (pl.CurrentIndex + 1) % uint32(len(pl.Adverts))
 }

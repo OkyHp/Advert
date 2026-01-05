@@ -3,66 +3,69 @@ package main
 import (
 	"fmt"
 	"runtime/debug"
+	"time"
 	"unsafe"
 
 	s2 "github.com/OkyHp/plg_utils/s2sdk"
 	"github.com/untrustedmodders/go-plugify"
 )
 
-var Plugin *ResetScorePlugin
+var Plugin *AdvertPlugin
 
 func init() {
 	//utils.CreateManifest("Advert", "1.0.0", "OkyHek", []string{"s2sdk"})
-
-	Plugin = NewResetScorePlugin()
+	Plugin = NewAdvertPlugin()
 
 	plugify.OnPluginStart(Plugin.OnPluginStart)
 	plugify.OnPluginEnd(Plugin.OnPluginEnd)
 	plugify.OnPluginPanic(Plugin.OnPluginPanic)
 }
 
-func (rs *ResetScorePlugin) OnPluginStart() {
-	var err error
-
+func (pl *AdvertPlugin) OnPluginStart() {
 	iface := s2.FindInterface("NetworkSystemVersion001")
 	if iface == 0 {
 		panic("interface nil")
 	}
-	rs.NetworkSystem = unsafe.Pointer(iface)
+	pl.NetworkSystem = unsafe.Pointer(iface)
 
-	rs.Config, err = ReadConfig()
+	var err error
+	Plugin.Config, err = ReadConfig()
 	if err != nil {
-		s2.PrintToServer(fmt.Sprintf("[Advert] CONFIG: %s\n", err))
+		fmt.Printf("[Advert] ReadConfig: %s\n", err)
 		return
 	}
-	MSGDebug("Advert ReadConfig: %v", rs.Config)
+	MSGDebug("Advert ReadConfig: %v", Plugin.Config)
 
-	err = InitDatabase()
-	if err != nil {
-		s2.PrintToServer(fmt.Sprintf("[Advert] DATABASE: %s\n", err))
-		return
-	}
-
-	s2.OnServerActivate_Register(rs.OnServerActivate)
+	s2.OnServerActivate_Register(pl.OnServerActivate)
 }
 
-func (rs *ResetScorePlugin) OnPluginEnd() {
+func (pl *AdvertPlugin) OnPluginEnd() {
 	MSGDebug("Advert OnPluginEnd")
 
-	s2.OnServerActivate_Unregister(rs.OnServerActivate)
+	s2.OnServerActivate_Unregister(pl.OnServerActivate)
 }
 
-func (rs *ResetScorePlugin) OnPluginPanic() []byte {
+func (pl *AdvertPlugin) OnPluginPanic() []byte {
 	return debug.Stack() // workaround for could not import runtime/debug inside plugify package
 }
 
-func (rs *ResetScorePlugin) OnServerActivate() { // it`s OnMapStart
-	Plugin.CurrentIndex = 0
-	changedAdverts := ReplacePlaceholders(Plugin.Adverts)
-	MSGDebug("Advert OnServerActivate. Index: %d | Adverts for map %v", Plugin.CurrentIndex, changedAdverts)
+func (pl *AdvertPlugin) OnServerActivate() { // it`s OnMapStart
+	if pl.MapLoadTime+int64(3) > time.Now().Unix() {
+		return
+	}
+	pl.MapLoadTime = time.Now().Unix()
 
-	if len(changedAdverts) > 0 {
-		s2.CreateTimer(Plugin.Config.TimerInterval, rs.OnTimerAdvert, s2.TimerFlag_NoMapChange|s2.TimerFlag_Repeat, []any{changedAdverts})
+	err := LoadAdvert()
+	if err != nil {
+		fmt.Printf("[Advert] LoadAdvert: %s\n", err)
+		return
+	}
+
+	Plugin.CurrentIndex = 0
+	MSGDebug("Advert OnServerActivate. Index: %d | Adverts for map %v", Plugin.CurrentIndex, pl.Adverts)
+
+	if len(pl.Adverts) > 0 {
+		s2.CreateTimer(Plugin.Config.TimerInterval, pl.OnTimerAdvert, s2.TimerFlag_NoMapChange|s2.TimerFlag_Repeat, []any{})
 	}
 }
 
