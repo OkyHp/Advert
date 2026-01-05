@@ -55,10 +55,10 @@ func (rs *ResetScorePlugin) OnPluginPanic() []byte {
 
 func (rs *ResetScorePlugin) OnServerActivate() { // it`s OnMapStart
 	Plugin.CurrentIndex = 0
-	ReplacePlaceholders()
+	changedAdverts := ReplacePlaceholders(Plugin.Adverts)
 
-	if len(Plugin.Adverts) > 0 {
-		s2.CreateTimer(Plugin.Config.TimerInterval, rs.OnTimerAdvert, s2.TimerFlag_NoMapChange|s2.TimerFlag_Repeat, []any{})
+	if len(changedAdverts) > 0 {
+		s2.CreateTimer(Plugin.Config.TimerInterval, rs.OnTimerAdvert, s2.TimerFlag_NoMapChange|s2.TimerFlag_Repeat, []any{changedAdverts})
 	}
 }
 

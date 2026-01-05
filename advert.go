@@ -6,7 +6,7 @@ import (
 )
 
 func (rs *ResetScorePlugin) OnTimerAdvert(timer uint32, userData []any) {
-	advert := rs.Adverts[rs.CurrentIndex]
+	advert := userData[0].([]AdvertsData)[rs.CurrentIndex]
 
 	for i := int32(0); i < s2.GetMaxClients()+1; i++ {
 		if s2.IsClientInGame(i) && !s2.IsFakeClient(i) { // IsVipClient

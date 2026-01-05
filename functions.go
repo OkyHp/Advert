@@ -62,13 +62,17 @@ func ReplaceStaticPlaceholders(advert *AdvertsData) {
 	}
 }
 
-func ReplacePlaceholders() {
-	for index, _ := range Plugin.Adverts {
-		for lang, _ := range Plugin.Adverts[index].MsgText {
-			Plugin.Adverts[index].MsgText[lang] =
-				strings.ReplaceAll(Plugin.Adverts[index].MsgText[lang], "{Map}", s2.GetCurrentMap())
+func ReplacePlaceholders(adverts []AdvertsData) []AdvertsData {
+	buff := adverts
+
+	for index, _ := range buff {
+		for lang, _ := range buff[index].MsgText {
+			buff[index].MsgText[lang] =
+				strings.ReplaceAll(buff[index].MsgText[lang], "{Map}", s2.GetCurrentMap())
 		}
 	}
+
+	return buff
 }
 
 func GetServerIP() string {
