@@ -113,3 +113,9 @@ func getVFunc(obj unsafe.Pointer, index int) unsafe.Pointer {
 	vtbl := *(*unsafe.Pointer)(obj)
 	return *(*unsafe.Pointer)(unsafe.Add(vtbl, uintptr(index)*unsafe.Sizeof(uintptr(0))))
 }
+
+func MSGDebug(text string, args ...interface{}) {
+	if Plugin.Config.Debug == true {
+		s2.PrintToServer(fmt.Sprintf("[DEBUG] "+text, args...))
+	}
+}

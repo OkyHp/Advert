@@ -20,18 +20,18 @@ var db *sql.DB
 func InitDatabase() error {
 	var err error
 
-	db, err = createConnection()
+	db, err = createDatabaseConnection()
 	if err != nil {
 		return err
 	}
 	defer db.Close()
 
-	err = CreateTable()
+	err = createTable()
 	if err != nil {
 		return err
 	}
 
-	err = GetAdverts()
+	err = getAdverts()
 	if err != nil {
 		return err
 	}
@@ -39,7 +39,7 @@ func InitDatabase() error {
 	return nil
 }
 
-func createConnection() (*sql.DB, error) {
+func createDatabaseConnection() (*sql.DB, error) {
 	loginURLValues := url.Values{}
 
 	// default params
@@ -59,6 +59,8 @@ func createConnection() (*sql.DB, error) {
 		RawQuery: loginURLValues.Encode(),
 	}
 
+	MSGDebug("Advert DB: %s", dsn.String()[2:])
+
 	db, err := sql.Open("mysql", dsn.String()[2:])
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
@@ -70,10 +72,12 @@ func createConnection() (*sql.DB, error) {
 		return nil, fmt.Errorf("failed to connect database: %w", err)
 	}
 
+	MSGDebug("Advert createDatabaseConnection")
+
 	return db, nil
 }
 
-func CreateTable() error {
+func createTable() error {
 	queries := []string{ // For N+ queries
 		`CREATE TABLE IF NOT EXISTS adverts(
 			id INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -93,10 +97,12 @@ func CreateTable() error {
 		}
 	}
 
+	MSGDebug("Advert createTable")
+
 	return nil
 }
 
-func GetAdverts() error {
+func getAdverts() error {
 	query := `
 		SELECT msg_type, msg_text
 		FROM adverts
@@ -137,6 +143,8 @@ func GetAdverts() error {
 	if err != nil {
 		return fmt.Errorf("rows 'adverts': %w", err)
 	}
+
+	MSGDebug("Advert getAdverts")
 
 	return nil
 }

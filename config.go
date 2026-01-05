@@ -18,6 +18,7 @@ type DBConfig struct {
 }
 
 type ConfigData struct {
+	Debug           bool     `yaml:"debug"`
 	TimerInterval   float64  `yaml:"timerInterval"`
 	ServerId        uint16   `yaml:"serverId"`
 	ServerIp        string   `yaml:"serverIp"`
@@ -39,6 +40,8 @@ func ReadConfig() (ConfigData, error) {
 	if err != nil {
 		return ConfigData{}, fmt.Errorf("failed to parse YAML: %w", err)
 	}
+
+	MSGDebug("Advert ReadConfig: %v", config)
 
 	return config, err
 }

@@ -19,6 +19,8 @@ func init() {
 	plugify.OnPluginStart(Plugin.OnPluginStart)
 	plugify.OnPluginEnd(Plugin.OnPluginEnd)
 	plugify.OnPluginPanic(Plugin.OnPluginPanic)
+
+	MSGDebug("Advert Init")
 }
 
 func (rs *ResetScorePlugin) OnPluginStart() {
@@ -43,10 +45,14 @@ func (rs *ResetScorePlugin) OnPluginStart() {
 	}
 
 	s2.OnServerActivate_Register(rs.OnServerActivate)
+
+	MSGDebug("Advert OnPluginStart")
 }
 
 func (rs *ResetScorePlugin) OnPluginEnd() {
 	s2.OnServerActivate_Unregister(rs.OnServerActivate)
+
+	MSGDebug("Advert OnPluginEnd")
 }
 
 func (rs *ResetScorePlugin) OnPluginPanic() []byte {
@@ -60,6 +66,8 @@ func (rs *ResetScorePlugin) OnServerActivate() { // it`s OnMapStart
 	if len(changedAdverts) > 0 {
 		s2.CreateTimer(Plugin.Config.TimerInterval, rs.OnTimerAdvert, s2.TimerFlag_NoMapChange|s2.TimerFlag_Repeat, []any{changedAdverts})
 	}
+
+	MSGDebug("Advert OnServerActivate. Index: %d | Adverts for map %v", Plugin.CurrentIndex, changedAdverts)
 }
 
 func main() {}
