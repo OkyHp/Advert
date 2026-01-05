@@ -10,6 +10,6 @@ database:
   pass: "pass"
   port: 3306
   params:
-    timeout: "5"
-    readTimeout: "10"
-    writeTimeout: "10"
+    timeout: "5s"
+    readTimeout: "10s"
+    writeTimeout: "10s"
