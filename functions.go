@@ -17,7 +17,7 @@ import (
 	"strings"
 	"unsafe"
 
-	s2 "github.com/OkyHp/plg_utils/s2sdk"
+	s2 "github.com/fr0nch/go-plugify-s2sdk/v2"
 )
 
 var placeholders = map[string]string{

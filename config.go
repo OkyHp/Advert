@@ -27,7 +27,7 @@ type ConfigData struct {
 }
 
 func ReadConfig() (ConfigData, error) {
-	pathToFile := fmt.Sprintf("%s/config.yml", plugify.Plugin.Location)
+	pathToFile := fmt.Sprintf("%s/advert.yml", plugify.ConfigsDir)
 
 	file, err := os.Open(pathToFile)
 	if err != nil {

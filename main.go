@@ -6,22 +6,22 @@ import (
 	"time"
 	"unsafe"
 
-	s2 "github.com/OkyHp/plg_utils/s2sdk"
+	s2 "github.com/fr0nch/go-plugify-s2sdk/v2"
 	"github.com/untrustedmodders/go-plugify"
 )
 
-var Plugin *AdvertPlugin
+var Plugin *SPlugin
 
 func init() {
 	//utils.CreateManifest("Advert", "1.0.0", "OkyHek", []string{"s2sdk"})
-	Plugin = NewAdvertPlugin()
+	Plugin = NewPlugin()
 
 	plugify.OnPluginStart(Plugin.OnPluginStart)
 	plugify.OnPluginEnd(Plugin.OnPluginEnd)
 	plugify.OnPluginPanic(Plugin.OnPluginPanic)
 }
 
-func (pl *AdvertPlugin) OnPluginStart() {
+func (pl *SPlugin) OnPluginStart() {
 	iface := s2.FindInterface("NetworkSystemVersion001")
 	if iface == 0 {
 		panic("interface nil")
@@ -39,17 +39,17 @@ func (pl *AdvertPlugin) OnPluginStart() {
 	s2.OnServerActivate_Register(pl.OnServerActivate)
 }
 
-func (pl *AdvertPlugin) OnPluginEnd() {
+func (pl *SPlugin) OnPluginEnd() {
 	MSGDebug("Advert OnPluginEnd")
 
 	s2.OnServerActivate_Unregister(pl.OnServerActivate)
 }
 
-func (pl *AdvertPlugin) OnPluginPanic() []byte {
+func (pl *SPlugin) OnPluginPanic() []byte {
 	return debug.Stack() // workaround for could not import runtime/debug inside plugify package
 }
 
-func (pl *AdvertPlugin) OnServerActivate() { // it`s OnMapStart
+func (pl *SPlugin) OnServerActivate() { // it`s OnMapStart
 	if time.Now().Unix() > pl.MapLoadTime+int64(3) {
 		err := LoadAdvert()
 		if err != nil {

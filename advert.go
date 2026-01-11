@@ -1,11 +1,11 @@
 package main
 
 import (
-	s2 "github.com/OkyHp/plg_utils/s2sdk"
 	"github.com/OkyHp/plg_utils/utils"
+	s2 "github.com/fr0nch/go-plugify-s2sdk/v2"
 )
 
-func (pl *AdvertPlugin) OnTimerAdvert(timer uint32, userData []any) {
+func (pl *SPlugin) OnTimerAdvert(timer uint32, userData []any) {
 	advert := pl.Adverts[pl.CurrentIndex]
 	MSGDebug("Advert OnTimerAdvert", advert)
 

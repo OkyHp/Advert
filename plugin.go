@@ -2,7 +2,7 @@ package main
 
 import "unsafe"
 
-type AdvertPlugin struct {
+type SPlugin struct {
 	Config ConfigData
 
 	Adverts      []AdvertsData
@@ -13,6 +13,6 @@ type AdvertPlugin struct {
 	NetworkSystem unsafe.Pointer
 }
 
-func NewAdvertPlugin() *AdvertPlugin {
-	return &AdvertPlugin{}
+func NewPlugin() *SPlugin {
+	return &SPlugin{}
 }
