@@ -9,12 +9,12 @@ import (
 )
 
 type DBConfig struct {
-	Host   string            `yaml:"host"`
-	Base   string            `yaml:"base"`
-	User   string            `yaml:"user"`
-	Pass   string            `yaml:"pass"`
-	Port   uint16            `yaml:"port"`
-	Params map[string]string `yaml:"params"`
+	Host   string `yaml:"host"`
+	Base   string `yaml:"base"`
+	User   string `yaml:"user"`
+	Pass   string `yaml:"pass"`
+	Port   uint16 `yaml:"port"`
+	Schema string `yaml:"schema"`
 }
 
 type ConfigData struct {

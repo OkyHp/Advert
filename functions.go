@@ -1,21 +1,9 @@
 package main
 
-/*
-#include <stdint.h>
-
-typedef void* (*UpdatePublicIPFn)(void*);
-
-static inline void* Call_UpdatePublicIP(void* fn, void* thisptr) {
-    return ((UpdatePublicIPFn)fn)(thisptr);
-}
-*/
-import "C"
-
 import (
 	"fmt"
 	"strconv"
 	"strings"
-	"unsafe"
 
 	s2 "github.com/fr0nch/go-plugify-s2sdk/v2"
 )
@@ -68,24 +56,7 @@ func GetServerIP() string {
 		return Plugin.Config.ServerIp
 	}
 
-	fnPtr := getVFunc(Plugin.NetworkSystem, 32)
-	if fnPtr == nil {
-		panic("fnPtr nil")
-	}
-
-	netadr := unsafe.Pointer(C.Call_UpdatePublicIP(
-		unsafe.Pointer(fnPtr),
-		Plugin.NetworkSystem,
-	))
-	if netadr == nil {
-		panic("netadr nil")
-	}
-
-	ip := (*[4]byte)(unsafe.Add(netadr, 4))
-
-	return fmt.Sprintf("Public IP: %d.%d.%d.%d\n",
-		ip[0], ip[1], ip[2], ip[3],
-	)
+	return s2.GetPublicAddress(true)
 }
 
 func GetServerPort() string {
@@ -95,11 +66,6 @@ func GetServerPort() string {
 	}
 
 	return ""
-}
-
-func getVFunc(obj unsafe.Pointer, index int) unsafe.Pointer {
-	vtbl := *(*unsafe.Pointer)(obj)
-	return *(*unsafe.Pointer)(unsafe.Add(vtbl, uintptr(index)*unsafe.Sizeof(uintptr(0))))
 }
 
 func MSGDebug(message string, args ...any) {

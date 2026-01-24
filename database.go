@@ -1,13 +1,11 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
-	"net/url"
-	"time"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/jmoiron/sqlx"
 )
 
 type AdvertsData struct {
@@ -16,7 +14,7 @@ type AdvertsData struct {
 }
 
 type Database struct {
-	conn *sql.DB
+	conn *sqlx.DB
 }
 
 func LoadAdvert() error {
@@ -30,6 +28,11 @@ func LoadAdvert() error {
 		return err
 	}
 	defer db.conn.Close()
+
+	_, err = db.conn.Exec(`SET search_path TO ` + Plugin.Config.Database.Schema + `;`)
+	if err != nil {
+		return fmt.Errorf("Set schema: %w", err)
+	}
 
 	if !Plugin.DatabaseInit {
 		err = db.createTable()
@@ -48,37 +51,25 @@ func LoadAdvert() error {
 	return nil
 }
 
-func createDatabaseConnection() (*sql.DB, error) {
-	loginURLValues := url.Values{}
+func createDatabaseConnection() (*sqlx.DB, error) {
+	// Build PostgreSQL connection string
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		Plugin.Config.Database.Host,
+		Plugin.Config.Database.Port,
+		Plugin.Config.Database.User,
+		Plugin.Config.Database.Pass,
+		Plugin.Config.Database.Base,
+	)
 
-	// default params
-	loginURLValues.Add("loc", time.Now().Location().String())
-	loginURLValues.Add("parseTime", "true")
-	loginURLValues.Add("charset", "utf8mb4")
+	MSGDebug("Advert DB: host=%s port=%d user=%s dbname=%s",
+		Plugin.Config.Database.Host,
+		Plugin.Config.Database.Port,
+		Plugin.Config.Database.User,
+		Plugin.Config.Database.Base)
 
-	// override params
-	for k, v := range Plugin.Config.Database.Params {
-		loginURLValues.Add(k, v)
-	}
-
-	dsn := url.URL{
-		Host:     fmt.Sprintf("tcp(%s:%d)", Plugin.Config.Database.Host, Plugin.Config.Database.Port),
-		User:     url.UserPassword(Plugin.Config.Database.User, Plugin.Config.Database.Pass),
-		Path:     Plugin.Config.Database.Base,
-		RawQuery: loginURLValues.Encode(),
-	}
-
-	MSGDebug("Advert DB: %s", dsn.String()[2:])
-
-	dbConn, err := sql.Open("mysql", dsn.String()[2:])
+	dbConn, err := sqlx.Open("pgx", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
-	}
-
-	err = dbConn.Ping()
-	if err != nil {
-		_ = dbConn.Close()
-		return nil, fmt.Errorf("failed to connect database: %w", err)
 	}
 
 	MSGDebug("Advert createDatabaseConnection")
@@ -87,23 +78,22 @@ func createDatabaseConnection() (*sql.DB, error) {
 }
 
 func (db *Database) createTable() error {
-	queries := []string{ // For N+ queries
-		`CREATE TABLE IF NOT EXISTS adverts(
-			id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+	query := `CREATE TABLE IF NOT EXISTS adverts (
+			id SERIAL PRIMARY KEY,
 			servers VARCHAR(64) NOT NULL DEFAULT '[]',
-			msg_type ENUM('CHAT', 'CENTER', 'ALERT', 'HTML') NOT NULL,
-			msg_text VARCHAR(4096) NOT NULL DEFAULT '{\r\n\"en\": \"\",\r\n\"uk\": \"\",\r\n\"ru\": \"\"\r\n}',
-			disable TINYINT UNSIGNED NOT NULL DEFAULT '0',
-			position INT NOT NULL DEFAULT '0',
-			PRIMARY KEY(id)
-		) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
-	}
+			msg_type VARCHAR(16) NOT NULL CHECK (msg_type IN ('CHAT', 'CENTER', 'ALERT', 'HTML')),
+			msg_text VARCHAR(8192) NOT NULL DEFAULT '{
+"en": "",
+"uk": "",
+"ru": ""
+}',
+			disable SMALLINT NOT NULL DEFAULT 0,
+			position INTEGER NOT NULL DEFAULT 0
+		);`
 
-	for index := range queries {
-		_, err := db.conn.Exec(queries[index])
-		if err != nil {
-			return fmt.Errorf("create table 'adverts' (#%d): %w", index, err)
-		}
+	_, err := db.conn.Exec(query)
+	if err != nil {
+		return fmt.Errorf("create table: %w", err)
 	}
 
 	MSGDebug("Advert createTable")
@@ -116,9 +106,9 @@ func (db *Database) getAdverts() error {
 		SELECT msg_type, msg_text
 		FROM adverts
 		WHERE (
-		    JSON_CONTAINS(servers, ?, '$') 
-		    OR servers = '' 
+		    servers = '' 
 		    OR servers = '[]'
+		    OR servers::jsonb @> jsonb_build_array($1::integer)
 		) AND disable = 0
 		ORDER BY id, position DESC
 	`
@@ -129,6 +119,7 @@ func (db *Database) getAdverts() error {
 	}
 	defer rows.Close()
 
+	Plugin.Adverts = []AdvertsData{}
 	for rows.Next() {
 		var item AdvertsData
 		var msgTextRaw string
